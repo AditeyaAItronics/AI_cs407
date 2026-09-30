@@ -1,0 +1,127 @@
+
+========================================================================
+Task 1: single affine layer + sigmoid on XOR
+========================================================================
+initial loss 0.7168  final loss 0.6931  (ln 2 = 0.6931)
+probabilities: [0.5, 0.5, 0.5, 0.5]
+weights: [[5.024897120620153e-08, 2.192771297870877e-08]] bias: [-1.2204376176327969e-08]
+correct: 2/4  (no line separates XOR, so at most 3/4 is possible; the BCE optimum is w = 0, p = 0.5 for every input, i.e. the model learns nothing)
+
+========================================================================
+Task 4A: 2-2-1 network (tanh), seed 0
+========================================================================
+initial loss 0.7152  ->  final loss 0.000083
+  x=[0.0, 0.0]  p=0.0001  label=0  target=0  OK
+  x=[0.0, 1.0]  p=0.9999  label=1  target=1  OK
+  x=[1.0, 0.0]  p=0.9999  label=1  target=1  OK
+  x=[1.0, 1.0]  p=0.0001  label=0  target=0  OK
+all four correct: True
+learned hidden representation h(x) (rows = inputs):
+ tensor([[-0.9863, -0.9724],
+        [ 0.9868, -1.0000],
+        [-1.0000,  0.9844],
+        [-0.9881, -0.9868]])
+
+========================================================================
+Task 4B: backpropagation check on W1 (first-layer weights)
+========================================================================
+W1.grad = dL/dW1 (mean loss over 4 examples):
+ tensor([[ 0.0005,  0.0006],
+        [-0.0426, -0.0448]])
+average of the 4 per-example gradients:
+ tensor([[ 0.0005,  0.0006],
+        [-0.0426, -0.0448]])
+max |difference|: 0.0
+finite-difference estimate of dL/dW1:
+ tensor([[ 0.0005,  0.0006],
+        [-0.0426, -0.0448]], dtype=torch.float64)
+max |autograd - finite difference|: 5.52614380037314e-11
+
+========================================================================
+Task 4C: symmetry experiment, all weights = 0
+========================================================================
+  step    0  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+  step    1  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+  step   10  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+  step  100  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+  step 1000  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+  step 2999  W1 row0 [0.0, 0.0]  row1 [0.0, 0.0]  grad rows equal: True
+final loss 0.6931  probabilities [0.5, 0.5, 0.5, 0.5]
+hidden rows identical after training: True
+
+========================================================================
+Task 4C: symmetry experiment, all weights = 0.5 (identical, nonzero)
+========================================================================
+  step    0  W1 row0 [0.5, 0.5]  row1 [0.5, 0.5]  grad rows equal: True
+  step    1  W1 row0 [0.4500000774860382, 0.4500000774860382]  row1 [0.4500000774860382, 0.4500000774860382]  grad rows equal: True
+  step   10  W1 row0 [0.020457714796066284, 0.020457714796066284]  row1 [0.020457714796066284, 0.020457714796066284]  grad rows equal: True
+  step  100  W1 row0 [-3.9354569911956787, -3.9354569911956787]  row1 [-3.9354569911956787, -3.9354569911956787]  grad rows equal: True
+  step 1000  W1 row0 [-6.486271381378174, -6.486271381378174]  row1 [-6.486271381378174, -6.486271381378174]  grad rows equal: True
+  step 2999  W1 row0 [-7.772630214691162, -7.772630214691162]  row1 [-7.772630214691162, -7.772630214691162]  grad rows equal: True
+final loss 0.4774  probabilities [8.532209176337346e-05, 0.6666761040687561, 0.6666761040687561, 0.6666860580444336]
+hidden rows identical after training: True
+
+========================================================================
+Task 4D: activation experiment (seed 0, grad norm at step 0)
+========================================================================
+activation  final loss  4/4 correct?   early ||dL/dW1||_2
+sigmoid       0.477423         False             0.000891
+tanh          0.000083          True             0.061785
+relu          0.693149         False             0.001699
+
+robustness over 20 seeds (same data, same optimiser):
+activation  runs 4/4 correct   mean early grad norm
+sigmoid              8/20                  0.007215
+tanh                 9/20                  0.032874
+relu                 5/20                  0.037336
+
+diagnostic: pre-activations a1 and hidden derivatives at initialisation (seed 0)
+  sigmoid: a1 =
+tensor([[-0.2723,  0.1896],
+        [ 0.1070, -0.3308],
+        [-0.2776, -0.3924],
+        [ 0.1017, -0.9128]])
+  f'(a1) =
+tensor([[0.2454, 0.2478],
+        [0.2493, 0.2433],
+        [0.2452, 0.2406],
+        [0.2494, 0.2044]])
+  relu: a1 =
+tensor([[-0.2723,  0.1896],
+        [ 0.1070, -0.3308],
+        [-0.2776, -0.3924],
+        [ 0.1017, -0.9128]])
+  f'(a1) =
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 0.],
+        [1., 0.]])
+
+========================================================================
+Task 5: three-class output with softmax + cross-entropy
+========================================================================
+final weight matrix shape (out x hidden): (3, 2)
+logits per example: 3
+
+autograd dL/dz at initialisation:
+ tensor([[-0.1790,  0.0825,  0.0964],
+        [ 0.0599, -0.1674,  0.1076],
+        [ 0.0562, -0.1694,  0.1132],
+        [ 0.0501,  0.0804, -0.1305]])
+(p - y) / N:
+ tensor([[-0.1790,  0.0825,  0.0964],
+        [ 0.0599, -0.1674,  0.1076],
+        [ 0.0562, -0.1694,  0.1132],
+        [ 0.0501,  0.0804, -0.1305]])
+max |difference|: 7.450580596923828e-09 
+
+initial loss 1.0591  ->  final loss 0.000039
+  x=[0.0, 0.0]  p=[0.9999510049819946, 4.8949234042083845e-05, 7.359545861618244e-09]  pred=0  target=0  OK
+  x=[0.0, 1.0]  p=[2.3396543838316575e-05, 0.9999691247940063, 7.454913884430425e-06]  pred=1  target=1  OK
+  x=[1.0, 0.0]  p=[2.3176880858954974e-05, 0.9999698400497437, 7.023849320830777e-06]  pred=1  target=1  OK
+  x=[1.0, 1.0]  p=[2.749714838046202e-07, 4.517807246884331e-05, 0.9999545812606812]  pred=2  target=2  OK
+
+softmax vector for x=[0,1]: [2.3396543838316575e-05, 0.9999691247940063, 7.454913884430425e-06]  sum = 1.0
+same logits + 100 -> [2.33964547078358e-05, 0.9999691247940063, 7.45488569009467e-06]  max |diff| = 2.3283064365386963e-10
+naive exp(logits + 1000): [inf, inf, inf] -> overflow, inf/inf = nan: [nan, nan, nan]
+max-subtracted softmax  : [2.3396276446874253e-05, 0.9999691247940063, 7.4551130637701135e-06]
