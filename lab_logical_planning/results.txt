@@ -1,0 +1,80 @@
+
+========================================================================
+Task 0: action applicability in the initial state
+========================================================================
+I = {At(Package,A), At(Robot,A)}
+  Move(A,B)            applicable
+  Move(B,A)            not applicable, unsatisfied: ['At(Robot,B)']
+  Move(B,C)            not applicable, unsatisfied: ['At(Robot,B)']
+  Move(C,B)            not applicable, unsatisfied: ['At(Robot,C)']
+  PickUp(Package,A)    applicable
+  PickUp(Package,B)    not applicable, unsatisfied: ['At(Package,B)', 'At(Robot,B)']
+  PickUp(Package,C)    not applicable, unsatisfied: ['At(Package,C)', 'At(Robot,C)']
+  Drop(Package,A)      not applicable, unsatisfied: ['Holding(Package)']
+  Drop(Package,B)      not applicable, unsatisfied: ['At(Robot,B)', 'Holding(Package)']
+  Drop(Package,C)      not applicable, unsatisfied: ['At(Robot,C)', 'Holding(Package)']
+
+========================================================================
+Task 1: hand-constructed plan, checked by the validator
+========================================================================
+  S0: {At(Package,A), At(Robot,A)}
+  S1: PickUp(Package,A) -> {At(Robot,A), Holding(Package)}
+  S2: Move(A,B) -> {At(Robot,B), Holding(Package)}
+  S3: Move(B,C) -> {At(Robot,C), Holding(Package)}
+  S4: Drop(Package,C) -> {At(Package,C), At(Robot,C)}
+valid: True - all preconditions satisfied and goal reached
+
+sequence listed as an illustration in the handout:
+  S0: {At(Package,A), At(Robot,A)}
+  S1: Move(A,B) -> {At(Package,A), At(Robot,B)}
+valid: False - step 2: PickUp(Package,B) not applicable, unsatisfied: ['At(Package,B)']
+
+========================================================================
+Task 3: tests of the planner
+========================================================================
+
+--- Test A: solvable warehouse problem ---
+initial state: {At(Package,A), At(Robot,A)}
+goal         : {At(Package,C)}
+plan found (4 steps, 8 states explored): PickUp(Package,A), Move(A,B), Move(B,C), Drop(Package,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1: PickUp(Package,A) -> {At(Robot,A), Holding(Package)}
+  S2: Move(A,B) -> {At(Robot,B), Holding(Package)}
+  S3: Move(B,C) -> {At(Robot,C), Holding(Package)}
+  S4: Drop(Package,C) -> {At(Package,C), At(Robot,C)}
+independent validation: True - all preconditions satisfied and goal reached
+
+--- Test B: PickUp removed (impossible) ---
+initial state: {At(Package,A), At(Robot,A)}
+goal         : {At(Package,C)}
+No plan found  (states explored: 3)
+
+--- Test C1: irrelevant actions Move(A,C) and Wait added ---
+initial state: {At(Package,A), At(Robot,A)}
+goal         : {At(Package,C)}
+plan found (3 steps, 8 states explored): PickUp(Package,A), Move(A,C), Drop(Package,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1: PickUp(Package,A) -> {At(Robot,A), Holding(Package)}
+  S2: Move(A,C) -> {At(Robot,C), Holding(Package)}
+  S3: Drop(Package,C) -> {At(Package,C), At(Robot,C)}
+independent validation: True - all preconditions satisfied and goal reached
+
+--- Test C2: irrelevant actions added, PickUp removed (robot can reach C, package cannot) ---
+initial state: {At(Package,A), At(Robot,A)}
+goal         : {At(Package,C)}
+No plan found  (states explored: 3)
+
+--- Test C3: goal At(Robot,C) instead of At(Package,C) ---
+initial state: {At(Package,A), At(Robot,A)}
+goal         : {At(Robot,C)}
+plan found (2 steps, 4 states explored): Move(A,B), Move(B,C)
+  S0: {At(Package,A), At(Robot,A)}
+  S1: Move(A,B) -> {At(Package,A), At(Robot,B)}
+  S2: Move(B,C) -> {At(Package,A), At(Robot,C)}
+independent validation: True - all preconditions satisfied and goal reached
+
+========================================================================
+Task 5: validating a claimed plan independently
+========================================================================
+claimed plan: PickUp(Package,A), Move(A,C), Drop(Package,C)
+valid: False - step 2: Move(A,C) is not an available action

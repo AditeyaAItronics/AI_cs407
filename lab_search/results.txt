@@ -1,0 +1,87 @@
+
+========================================================================
+Task 3: tests of the A* agent (Manhattan heuristic)
+========================================================================
+
+--- Test 1: original warehouse ---
+solution found: Yes   path length: 40   states expanded: 64   valid path: True
+path (row, col): (1, 1) -> (1, 2) -> (1, 3) -> (1, 4) -> (1, 5) -> (2, 5) -> (3, 5) -> (4, 5) -> (5, 5) -> (5, 6) -> (5, 7) -> (5, 8) -> (5, 9) -> (5, 10) -> (5, 11) -> (5, 12) -> (5, 13) -> (4, 13) -> (3, 13) -> (3, 12) -> (3, 11) -> (3, 10) -> (3, 9) -> (3, 8) -> (3, 7) -> (2, 7) -> (1, 7) -> (1, 8) -> (1, 9) -> (1, 10) -> (1, 11) -> (1, 12) -> (1, 13) -> (1, 14) -> (1, 15) -> (2, 15) -> (3, 15) -> (4, 15) -> (5, 15) -> (6, 15) -> (7, 15)
+actions: Right, Right, Right, Right, Down, Down, Down, Down, Right, Right, Right, Right, Right, Right, Right, Right, Up, Up, Left, Left, Left, Left, Left, Left, Up, Up, Right, Right, Right, Right, Right, Right, Right, Right, Down, Down, Down, Down, Down, Down
+#################
+#S****#*********#
+#.###*#*#######*#
+#...#*#*******#*#
+###.#*#######*#*#
+#...#*********#*#
+#.###########.#*#
+#.............#G#
+#################
+shortest possible length (BFS): 40  -> A* optimal: True
+
+--- Test 2: trivial case ---
+solution found: Yes   path length: 1   states expanded: 2   valid path: True
+path (row, col): (1, 1) -> (1, 2)
+actions: Right
+#####
+#SG##
+#####
+shortest possible length (BFS): 1  -> A* optimal: True
+
+--- Test 3: no solution ---
+solution found: No   (states expanded: 9)
+
+--- Test 4: alternative paths ---
+solution found: Yes   path length: 4   states expanded: 5   valid path: True
+path (row, col): (1, 1) -> (1, 2) -> (1, 3) -> (1, 4) -> (1, 5)
+actions: Right, Right, Right, Right
+#######
+#S***G#
+#.###.#
+#.....#
+#######
+shortest possible length (BFS): 4  -> A* optimal: True
+
+========================================================================
+Task 5: BFS vs A* on the original warehouse
+========================================================================
+measure              BFS      A*
+solution found      True    True
+path length           40      40
+states expanded       64      64
+(free cells in the warehouse: 64)
+
+========================================================================
+Task 6: heuristic investigation
+========================================================================
+
+original warehouse (optimal path length 40)
+heuristic        found  length  expanded  optimal?
+h = 0             True      40        64      True
+Manhattan         True      40        64      True
+Euclidean         True      40        64      True
+2 x Manhattan     True      40        64      True
+
+second map (optimal path length 11)
+heuristic        found  length  expanded  optimal?
+h = 0             True      11        28      True
+Manhattan         True      11        18      True
+Euclidean         True      11        19      True
+2 x Manhattan     True      13        15     False
+
+second map, 2 x Manhattan path:
+##########
+#S#....#.#
+#**#.#...#
+##*...***#
+#.*****#*#
+##.####.G#
+##########
+
+second map, Manhattan path:
+##########
+#S#....#.#
+#**#.#...#
+##*******#
+#......#*#
+##.####.G#
+##########

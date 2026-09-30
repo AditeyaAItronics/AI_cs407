@@ -1,0 +1,20 @@
+the cat ran to the dog ran to the rug
+the park
+the cat sat on the mat
+the dog ran to the mat
+the dog ran to the rug
+the dog sat on the dog sat on the mat
+the cat sat on the mat
+the mat
+the cat ran to the dog sat on the cat sat on the rug
+the park
+the cat sat on the cat sat on the dog sat on the mat
+the rug
+the rug
+the rug
+the dog ran to the dog sat on the dog ran to the dog sat on the rug
+the rug
+the park
+the mat
+the rug
+the mat

@@ -1,0 +1,16 @@
+Task 6: planner.pl
+?- can_move(a,b).   true
+can_move(a, b)  resolved with  can_move(X, Y) :- connected(X, Y)
+  connected(a, b)  resolved with  connected(a, b)
+?- can_move(a,c).   false
+
+Task 7: checking moves proposed by the Python planner
+?- valid_move(a,b).   true
+?- valid_move(b,c).   true
+?- valid_move(a,c).   false
+
+Task 8: road.pl
+?- reduce_speed.   true
+reduce_speed  resolved with  reduce_speed :- slippery
+  slippery  resolved with  slippery :- wet_road
+    wet_road  resolved with  wet_road

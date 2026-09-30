@@ -1,0 +1,157 @@
+
+========================================================================
+Part III: training data with markers
+========================================================================
+<START> the cat sat on the mat <END>
+<START> the cat sat on the rug <END>
+<START> the dog sat on the mat <END>
+<START> the dog ran to the park <END>
+<START> the cat ran to the park <END>
+<START> the dog sat on the rug <END>
+vocabulary: ['cat', 'dog', 'mat', 'on', 'park', 'ran', 'rug', 'sat', 'the', 'to']
+
+========================================================================
+Part IV / Q3: first-order CPT  P(next | current)
+========================================================================
+ <START> | counts {'the': 6}
+         | P      the: 1.000
+     the | counts {'cat': 3, 'mat': 2, 'rug': 2, 'dog': 3, 'park': 2}
+         | P      cat: 0.250, dog: 0.250, mat: 0.167, park: 0.167, rug: 0.167
+     cat | counts {'sat': 2, 'ran': 1}
+         | P      sat: 0.667, ran: 0.333
+     dog | counts {'sat': 2, 'ran': 1}
+         | P      sat: 0.667, ran: 0.333
+     sat | counts {'on': 4}
+         | P      on: 1.000
+     ran | counts {'to': 2}
+         | P      to: 1.000
+      on | counts {'the': 4}
+         | P      the: 1.000
+      to | counts {'the': 2}
+         | P      the: 1.000
+     mat | counts {'<END>': 2}
+         | P      <END>: 1.000
+     rug | counts {'<END>': 2}
+         | P      <END>: 1.000
+    park | counts {'<END>': 2}
+         | P      <END>: 1.000
+
+zero-probability transitions from the five required words:
+  P(. | the) = 0 for: ['on', 'ran', 'sat', 'the', 'to', '<END>']
+  P(. | cat) = 0 for: ['cat', 'dog', 'mat', 'on', 'park', 'rug', 'the', 'to', '<END>']
+  P(. | dog) = 0 for: ['cat', 'dog', 'mat', 'on', 'park', 'rug', 'the', 'to', '<END>']
+  P(. | sat) = 0 for: ['cat', 'dog', 'mat', 'park', 'ran', 'rug', 'sat', 'the', 'to', '<END>']
+  P(. | ran) = 0 for: ['cat', 'dog', 'mat', 'on', 'park', 'ran', 'rug', 'sat', 'the', '<END>']
+
+========================================================================
+Part VII / Q8: normalisation test  sum_v P(v | context) = 1
+========================================================================
+first-order: 11 contexts checked, min total 1.000000000000000, max total 1.000000000000000, failures: 0
+second-order: 15 contexts checked, min total 1.000000000000000, max total 1.000000000000000, failures: 0
+   <START>: 1.0
+       the: 1.0
+       cat: 1.0
+       dog: 1.0
+       sat: 1.0
+       ran: 1.0
+
+========================================================================
+Q7: behaviour on an unseen word
+========================================================================
+KeyError: "context ('bird',) never observed in training data; P(X_t | ('bird',)) is undefined"
+
+========================================================================
+Part VIII / Q9: next-word prediction (argmax)
+========================================================================
+P(X_t+1 | X_t = the ) = {cat: 0.250, dog: 0.250, mat: 0.167, park: 0.167, rug: 0.167}  -> argmax: cat
+P(X_t+1 | X_t = cat ) = {sat: 0.667, ran: 0.333}  -> argmax: sat
+P(X_t+1 | X_t = dog ) = {sat: 0.667, ran: 0.333}  -> argmax: sat
+P(X_t+1 | X_t = sat ) = {on: 1.000}  -> argmax: on
+P(X_t+1 | X_t = ran ) = {to: 1.000}  -> argmax: to
+P(X_t+1 | X_t = on  ) = {the: 1.000}  -> argmax: the
+P(X_t+1 | X_t = to  ) = {the: 1.000}  -> argmax: the
+
+========================================================================
+Part IX: 20 sentences sampled from the first-order model
+========================================================================
+ 1. the cat ran to the dog ran to the rug         (new)  P = 0.00116
+ 2. the park                                      (new)  P = 0.167
+ 3. the cat sat on the mat                        (training sentence)  P = 0.0278
+ 4. the dog ran to the mat                        (new)  P = 0.0139
+ 5. the dog ran to the rug                        (new)  P = 0.0139
+ 6. the dog sat on the dog sat on the mat         (new)  P = 0.00463
+ 7. the cat sat on the mat                        (training sentence)  P = 0.0278
+ 8. the mat                                       (new)  P = 0.167
+ 9. the cat ran to the dog sat on the cat sat on the rug (new)  P = 0.000386
+10. the park                                      (new)  P = 0.167
+11. the cat sat on the cat sat on the dog sat on the mat (new)  P = 0.000772
+12. the rug                                       (new)  P = 0.167
+13. the rug                                       (new)  P = 0.167
+14. the rug                                       (new)  P = 0.167
+15. the dog ran to the dog sat on the dog ran to the dog sat on the rug (new)  P = 3.22e-05
+16. the rug                                       (new)  P = 0.167
+17. the park                                      (new)  P = 0.167
+18. the mat                                       (new)  P = 0.167
+19. the rug                                       (new)  P = 0.167
+20. the mat                                       (new)  P = 0.167
+
+========================================================================
+Part X / Q10: greedy vs sampling (first-order, 5 each)
+========================================================================
+Mode A - greedy:
+   the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on ...[truncated at MAX_LEN]
+   the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on ...[truncated at MAX_LEN]
+   the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on ...[truncated at MAX_LEN]
+   the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on ...[truncated at MAX_LEN]
+   the cat sat on the cat sat on the cat sat on the cat sat on the cat sat on ...[truncated at MAX_LEN]
+Mode B - sampling:
+   the dog sat on the dog sat on the park
+   the mat
+   the mat
+   the dog ran to the dog ran to the park
+   the mat
+
+========================================================================
+Part XI/XII: second-order CPT  P(next | previous two)
+========================================================================
+P(X_t | <START>, <START>) = {the: 1.000}
+P(X_t | <START>, the) = {cat: 0.500, dog: 0.500}
+P(X_t | the, cat) = {sat: 0.667, ran: 0.333}
+P(X_t | the, dog) = {sat: 0.667, ran: 0.333}
+P(X_t | cat, sat) = {on: 1.000}
+P(X_t | dog, ran) = {to: 1.000}
+P(X_t | on, the) = {mat: 0.500, rug: 0.500}
+P(X_t | to, the) = {park: 1.000}
+unseen context example -> KeyError: "context ('cat', 'on') never observed in training data; P(X_t | ('cat', 'on')) is undefined"
+
+========================================================================
+Part XIII: comparison of the two models
+========================================================================
+measure                                 first-order  second-order
+possible contexts                                11           111
+observed contexts                                11            15
+zero-probability (unseen) contexts                0            96
+full CPT free parameters                        110          1110
+non-zero probabilities stored                    17            19
+observed free parameters                          6             4
+
+first-order: 20 samples, 11 distinct, 10 distinct sentences not in training data
+   the cat ran to the dog ran to the rug         (new)  P1 = 0.00116  P2 = 0
+   the cat ran to the dog sat on the cat sat on the rug (new)  P1 = 0.000386  P2 = 0
+   the cat sat on the cat sat on the dog sat on the mat (new)  P1 = 0.000772  P2 = 0
+   the cat sat on the mat                        (training)  P1 = 0.0278  P2 = 0.167
+   the dog ran to the dog sat on the dog ran to the dog sat on the rug (new)  P1 = 3.22e-05  P2 = 0
+   the dog ran to the mat                        (new)  P1 = 0.0139  P2 = 0
+   the dog ran to the rug                        (new)  P1 = 0.0139  P2 = 0
+   the dog sat on the dog sat on the mat         (new)  P1 = 0.00463  P2 = 0
+   the mat                                       (new)  P1 = 0.167  P2 = 0
+   the park                                      (new)  P1 = 0.167  P2 = 0
+   the rug                                       (new)  P1 = 0.167  P2 = 0
+
+second-order: 20 samples, 6 distinct, 0 distinct sentences not in training data
+   the cat ran to the park                       (training)  P1 = 0.0139  P2 = 0.167
+   the cat sat on the mat                        (training)  P1 = 0.0278  P2 = 0.167
+   the cat sat on the rug                        (training)  P1 = 0.0278  P2 = 0.167
+   the dog ran to the park                       (training)  P1 = 0.0139  P2 = 0.167
+   the dog sat on the mat                        (training)  P1 = 0.0278  P2 = 0.167
+   the dog sat on the rug                        (training)  P1 = 0.0278  P2 = 0.167
