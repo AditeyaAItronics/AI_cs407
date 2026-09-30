@@ -7,7 +7,7 @@ This is my solution to the lab
 |---|---|
 | [`neural_models_lab.py`](neural_models_lab.py) | All experiments (Tasks 1, 4A–4D, 5) in one script |
 | [`results.txt`](results.txt) | Full output of `python neural_models_lab.py` (all numbers below come from it) |
-| `README.md` | This report: specification, design, results, and reflection answers |
+| `README.md` / [`REPORT.pdf`](REPORT.pdf) | This report (specification, design, results, reflection answers) as Markdown and as PDF |
 
 Requirements: Python 3, PyTorch (CPU). Run it with:
 
@@ -145,7 +145,7 @@ With *zero* initialisation it is even worse. W⁽²⁾ = 0 makes ∂L/∂h = W�
 
 ### Part D – Activation experiment (seed 0, gradient norm at step 0)
 
-| Hidden activation | Final loss | 4/4 correct? | Early ‖∇_{W⁽¹⁾}L‖₂ |
+| Hidden activation | Final loss | 4/4 correct? | Early ‖∂L/∂W⁽¹⁾‖₂ |
 |---|---|---|---|
 | Sigmoid | 0.4774 | No | 0.000891 |
 | Tanh | 0.000083 | Yes | 0.061785 |
@@ -153,7 +153,7 @@ With *zero* initialisation it is even worse. W⁽²⁾ = 0 makes ∂L/∂h = W�
 
 Because one seed and four points prove little, I also ran 20 seeds with the same data and optimiser:
 
-| Hidden activation | Runs with 4/4 correct | Mean early ‖∇_{W⁽¹⁾}L‖₂ |
+| Hidden activation | Runs with 4/4 correct | Mean early ‖∂L/∂W⁽¹⁾‖₂ |
 |---|---|---|
 | Sigmoid | 8 / 20 | 0.0072 |
 | Tanh | 9 / 20 | 0.0329 |
@@ -219,7 +219,7 @@ For x = (0,1) the softmax vector sums to **1.0**.
 3. **Why identical initialisation fails.** Identical hidden units compute identical outputs and so receive identical gradients and identical updates. The symmetry is never broken, and the layer acts like a single unit. With all-zero weights, W⁽²⁾ = 0 also blocks all gradient into W⁽¹⁾, so the first layer never changes at all.
 
 4. **Effect of activation on the gradient.**
-   - *Engineering observation:* at initialisation ‖∇_{W⁽¹⁾}L‖ was about 0.0009 for sigmoid, 0.06 for tanh, and 0.0017 for ReLU (seed 0). Success rates over 20 seeds were 8, 9 and 5.
+   - *Engineering observation:* at initialisation ‖∂L/∂W⁽¹⁾‖ was about 0.0009 for sigmoid, 0.06 for tanh, and 0.0017 for ReLU (seed 0). Success rates over 20 seeds were 8, 9 and 5.
    - *Scientific explanation:* the backward pass multiplies by f′(a). Sigmoid's f′ ≤ 0.25 shrinks the signal, and its outputs are not zero-centred. Tanh's f′ ≤ 1 and it is zero-centred. ReLU's f′ is exactly 1 or 0, so it passes gradients undiminished through active units but blocks them completely through inactive ones. With only 2 hidden units, losing one is fatal.
 
 5. **Why output layer and loss go together.** Together they define the probabilistic model of the target: Bernoulli → sigmoid + BCE, categorical → softmax + CE, real-valued Gaussian → linear + MSE. The matched pairs are negative log-likelihoods, so the logit gradient is simply p − y: well-scaled, and not killed by saturation. A mismatched pair behaves badly. Sigmoid + MSE has vanishing gradients on confident mistakes. Softmax + BCE treats mutually exclusive classes as independent.
