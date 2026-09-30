@@ -1,6 +1,6 @@
 # CS F407 – Neural Models Lab: Learning, Depth, Activations, Output Layers
 
-This is my solution to the lab
+This report presents the solution to the laboratory exercise
 [`neur_models_lab.pdf`](https://github.com/tirtharajdash/CS-F407-AI-AY2026-27-S1/blob/main/materials/neur_models_lab.pdf).
 
 | File | Contents |
@@ -41,15 +41,15 @@ x2
         0                  1
 ```
 
-The two positive points sit on one diagonal and the two negative points on the other.
+The two positive points lie on one diagonal and the two negative points on the other.
 
-**Why one line fails.** Suppose a line w·x + b > 0 selects exactly the positive points. Then (0,1) and (1,0) give w₂ + b > 0 and w₁ + b > 0. Adding these gives w₁ + w₂ + 2b > 0. But (0,0) and (1,1) need b ≤ 0 and w₁ + w₂ + b ≤ 0, which sum to w₁ + w₂ + 2b ≤ 0. That is a contradiction, so XOR is not linearly separable.
+**Why no single linear boundary suffices.** Suppose a line w·x + b > 0 selects exactly the positive points. Then (0,1) and (1,0) give w₂ + b > 0 and w₁ + b > 0. Adding these gives w₁ + w₂ + 2b > 0. But (0,0) and (1,1) need b ≤ 0 and w₁ + w₂ + b ≤ 0, which sum to w₁ + w₂ + 2b ≤ 0. That is a contradiction, so XOR is not linearly separable.
 
-**Prediction for affine + sigmoid.** A single affine layer can classify at most 3 of the 4 points. With binary cross-entropy (BCE), the symmetry of XOR makes the best parameters w = 0, b = 0: every input gets p = 0.5 and the loss is ln 2 ≈ 0.693.
+**Prediction for affine + sigmoid.** A single affine layer can classify at most 3 of the 4 points. With binary cross-entropy (BCE), the symmetry of XOR makes the best parameters w = 0, b = 0: every input is assigned p = 0.5 and the loss is ln 2 ≈ 0.693.
 
 **Result (confirms the prediction):** the loss went from 0.7168 to **0.6931 = ln 2**. The weights shrank to about 10⁻⁸ and every probability ended at exactly 0.5.
 
-> **Think about it:** XOR tests the claim that *the kind of representation matters, not the number of parameters*. No amount of affine capacity solves it. A nonlinear re-encoding of the input (the hidden layer) does.
+> **Think about it:** XOR tests the claim that *the kind of representation matters, not the number of parameters*. Increasing affine capacity alone cannot solve it; a nonlinear re-encoding of the input (the hidden layer) can.
 
 ---
 
@@ -58,16 +58,16 @@ The two positive points sit on one diagonal and the two negative points on the o
 **Model:** 2 inputs → 2 hidden units (tanh; sigmoid and ReLU are compared in 4D) → 1 output logit.
 The output probability is p = σ(logit). The loss is BCE, implemented as `BCEWithLogitsLoss`, which is numerically stable. Training is gradient-based: backpropagation computes the gradients and Adam updates the parameters.
 
-1. **Why the hidden nonlinearity is needed.** Stacking affine maps gives another affine map: W₂(W₁x + b₁) + b₂ = W′x + b′. Depth without a nonlinearity is therefore still one line, and Task 1 showed that fails. A nonlinearity lets the hidden layer bend the input space into a representation where XOR *is* linearly separable.
-2. **Why sigmoid pairs with BCE.** The target is a single yes/no, i.e. a Bernoulli variable. σ maps a logit to a valid probability, and BCE is that Bernoulli distribution's negative log-likelihood. Together their gradient with respect to the logit is simply p − y. So the gradient does not vanish when σ saturates on a wrong answer, which it would with, for example, sigmoid + MSE.
+1. **Why the hidden nonlinearity is needed.** Stacking affine maps gives another affine map: W₂(W₁x + b₁) + b₂ = W′x + b′. Depth without a nonlinearity therefore still yields a single linear boundary, which Task 1 showed to be insufficient. A nonlinearity allows the hidden layer to transform the input space into a representation where XOR *is* linearly separable.
+2. **Why sigmoid pairs with BCE.** The target is a single binary outcome, i.e. a Bernoulli variable. σ maps a logit to a valid probability, and BCE is that Bernoulli distribution's negative log-likelihood. Together their gradient with respect to the logit is simply p − y. So the gradient does not vanish when σ saturates on a wrong answer, which it would with, for example, sigmoid + MSE.
 3. **Validation criteria (what counts as learning):**
-   - the final loss is far below ln 2 (the "know nothing" loss), say < 0.01;
+   - the final loss is far below ln 2 (the loss of an uninformative predictor), specifically below 0.01;
    - all 4 thresholded predictions are correct, with confident probabilities (< 0.1 or > 0.9);
    - the gradients are non-zero and correct: autograd matches a finite-difference estimate;
-   - the result holds across several random seeds, not just one lucky run;
+   - the result holds across several random seeds, rather than in a single favourable run;
    - the hidden representation h(x) actually makes the classes separable.
 
-> **Think about it:** the hidden units have no targets. What each one computes is decided entirely by the output loss. Backprop assigns credit by sending ∂L/∂h = W₂ᵀ(p − y) back through the chain rule, and each hidden unit is pushed in whatever direction lowers the final loss.
+> **Think about it:** the hidden units have no targets. What each one computes is decided entirely by the output loss. Backpropagation assigns credit by sending ∂L/∂h = W₂ᵀ(p − y) back through the chain rule, and each hidden unit is updated in the direction that reduces the final loss.
 
 ---
 
@@ -101,7 +101,7 @@ The output probability is p = σ(logit). The loss is BCE, implemented as `BCEWit
 
 Beyond what the lab asks, I added a finite-difference gradient check, the per-example averaging check, and 20-seed robustness runs.
 
-> **Think about it:** reading the code alone can verify the architecture, loss choice, data, and the forward/backward/step order (e.g. the double-sigmoid bug). Whether it *learns*, whether the gradients are *numerically correct*, and how sensitive it is to seed and activation all require running it and measuring.
+> **Think about it:** reading the code alone can verify the architecture, loss choice, data, and the forward/backward/step order (e.g. an erroneous double application of the sigmoid). Whether it *learns*, whether the gradients are *numerically correct*, and how sensitive it is to seed and activation all require running it and measuring.
 
 ---
 
@@ -118,7 +118,7 @@ Initial loss **0.7152** → final loss **0.000083**.
 | (1,0) | 0.9999 | 1 | 1 ✓ |
 | (1,1) | 0.0001 | 0 | 0 ✓ |
 
-All four are correct. The learned hidden code h(x) is roughly (−1,−1), (+1,−1), (−1,+1), (−1,−1) for the four inputs. Hidden unit 1 fires only for (0,1), and unit 2 only for (1,0). In h-space the two positive points are separated from the two negatives by a single line, so the network has *learned a representation that makes XOR linearly separable*.
+All four are correct. The learned hidden code h(x) is roughly (−1,−1), (+1,−1), (−1,+1), (−1,−1) for the four inputs. Hidden unit 1 is active only for (0,1), and unit 2 only for (1,0). In h-space the two positive points are separated from the two negatives by a single line, so the network has *learned a representation that makes XOR linearly separable*.
 
 ### Part B – Backpropagation check
 
@@ -139,9 +139,9 @@ W1.grad = [[ 0.0005,  0.0006],
 | all weights and biases = 0 | stay exactly `[0, 0]` for all 3000 steps | 0.6931 | No (p = 0.5 everywhere) |
 | all weights and biases = 0.5 | move (0.5 → −7.77) but the two rows stay **identical** | 0.4774 | No (3/4; p = 0.67 for three inputs) |
 
-**Explanation.** When both hidden units have the same incoming weights, they compute the same activation h₁ = h₂ for every input. They also have the same outgoing weight, so they receive the same gradient ∂L/∂h₁ = ∂L/∂h₂. Identical gradients produce identical updates, so the units stay clones forever, and the network behaves like a 2–1–1 network, which cannot solve XOR.
+**Explanation.** When both hidden units have the same incoming weights, they compute the same activation h₁ = h₂ for every input. They also have the same outgoing weight, so they receive the same gradient ∂L/∂h₁ = ∂L/∂h₂. Identical gradients produce identical updates, so the units remain identical throughout training, and the network behaves like a 2–1–1 network, which cannot solve XOR.
 
-With *zero* initialisation it is even worse. W⁽²⁾ = 0 makes ∂L/∂h = W⁽²⁾ᵀ(p − y) = 0, so the first layer gets no gradient at all. Only the output bias trains, and it stays at 0 because the targets are balanced. Random initialisation is what breaks the symmetry.
+Zero initialisation is more restrictive still. W⁽²⁾ = 0 makes ∂L/∂h = W⁽²⁾ᵀ(p − y) = 0, so the first layer gets no gradient at all. Only the output bias trains, and it stays at 0 because the targets are balanced. Random initialisation is what breaks the symmetry.
 
 ### Part D – Activation experiment (seed 0, gradient norm at step 0)
 
@@ -151,7 +151,7 @@ With *zero* initialisation it is even worse. W⁽²⁾ = 0 makes ∂L/∂h = W�
 | Tanh | 0.000083 | Yes | 0.061785 |
 | ReLU | 0.6931 | No | 0.001699 |
 
-Because one seed and four points prove little, I also ran 20 seeds with the same data and optimiser:
+Because a single seed on four data points provides limited evidence, I also ran 20 seeds with the same data and optimiser:
 
 | Hidden activation | Runs with 4/4 correct | Mean early ‖∂L/∂W⁽¹⁾‖₂ |
 |---|---|---|
@@ -159,13 +159,13 @@ Because one seed and four points prove little, I also ran 20 seeds with the same
 | Tanh | 9 / 20 | 0.0329 |
 | ReLU | 5 / 20 | 0.0373 |
 
-**Interpretation.** With a 2-unit hidden layer every activation sometimes fails. The 2–2–1 XOR loss surface has plateaus and local minima: a run can end at loss ≈ 0.48 with 3 of 4 correct, as sigmoid did here, or stuck at ln 2 = 0.693, as ReLU did here. Differences observed in this experiment:
+**Interpretation.** With a 2-unit hidden layer every activation sometimes fails. The 2–2–1 XOR loss surface has plateaus and local minima: a run can end at loss ≈ 0.48 with 3 of 4 correct, as sigmoid did here, or remain at ln 2 = 0.693, as ReLU did here. Differences observed in this experiment:
 
 - **Sigmoid** had the smallest early gradient (about 0.0009 for seed 0, about 0.007 on average). Its derivative is at most 0.25 (the diagnostic shows f′(a) ≈ 0.20–0.25 at initialisation), and it is not zero-centred, so the backward signal through the hidden layer shrinks.
-- **Tanh** had larger gradients, because its derivative is at most 1 and it is zero-centred. For seed 0 it learned the cleanest solution.
-- **ReLU** failed most often. With only 2 hidden units, a unit whose pre-activation is negative for most inputs gets zero gradient on those inputs. The diagnostic shows that for seed 0 hidden unit 2 is active on only 1 of 4 inputs and unit 1 on 2 of 4. Once the units die on the inputs that matter, learning stalls at ln 2.
+- **Tanh** had larger gradients, because its derivative is at most 1 and it is zero-centred. For seed 0 it learned the most accurate solution.
+- **ReLU** failed most often. With only 2 hidden units, a unit whose pre-activation is negative for most inputs gets zero gradient on those inputs. The diagnostic shows that for seed 0 hidden unit 2 is active on only 1 of 4 inputs and unit 1 on 2 of 4. Once the units become inactive on the relevant inputs, learning stalls at ln 2.
 
-This does not show any activation is universally best. The rankings describe only this tiny 2-unit network, this optimiser, and these seeds. A wider hidden layer, or a different learning rate, could change them.
+This does not show any activation is universally best. The rankings describe only this small 2-unit network, this optimiser, and these seeds. A wider hidden layer, or a different learning rate, could change them.
 
 > **Think about it:** saturation and dead ReLUs can be told apart by logging the **pre-activations a⁽¹⁾**.
 > A saturated sigmoid/tanh unit has |a| large (e.g. |a| > 5), so h is near 0/1 (or ±1) and f′(a) = h(1−h) ≈ 0.
@@ -200,17 +200,15 @@ For x = (0,1) the softmax vector sums to **1.0**.
 
 **Optional diagnostic.** Adding 100 to all three logits changed the probabilities by at most **2.3 × 10⁻¹⁰**, which is float round-off. This follows from e^{z+c}/Σe^{z+c} = e^{z}/Σe^{z}. Adding 1000, however, makes a naive `exp` overflow to `inf`, and `inf/inf = nan`. That is why stable implementations compute softmax(z − max z). The answer is mathematically the same, but the largest exponent becomes e⁰ = 1, so nothing overflows. The max-subtracted version returned the correct probabilities.
 
-> **Think about it:** next-token prediction is the same problem with K ≈ 50,000 classes. What stays the same: the softmax, the cross-entropy loss, the logit gradient p − y, the probabilities summing to 1, shift invariance, and the need for max-subtraction. What changes dramatically: the input is a variable-length token sequence rather than two bits. The hidden representation comes from a deep transformer with attention instead of 2 tanh units. The output matrix is d × 50,000, so it dominates parameters and compute. Training needs mini-batches over huge corpora, and inference needs sampling strategies.
-
 ---
 
 ## Reflection questions
 
-1. **Depth vs nonlinearity.** Depth alone does nothing: stacked affine layers collapse to one affine map, which provably cannot fit XOR (Task 1: stuck at ln 2). Adding a single nonlinear hidden layer with only 2 units was enough (loss 8 × 10⁻⁵). What matters is the *nonlinear re-representation*, not the layer count.
+1. **Depth vs nonlinearity.** Depth alone is insufficient: stacked affine layers collapse to one affine map, which provably cannot fit XOR (Task 1: stuck at ln 2). Adding a single nonlinear hidden layer with only 2 units was enough (loss 8 × 10⁻⁵). What matters is the *nonlinear re-representation*, not the layer count.
 
 2. **Evidence of a *useful* learning signal.** Several signs together:
    - The loss fell steadily from 0.715 to 8 × 10⁻⁵.
-   - All four predictions flipped to the correct side with confidence.
+   - All four predictions moved to the correct class with high confidence.
    - The hidden layer developed a *new, interpretable code*: one unit per "disagree" input, which makes the classes linearly separable.
    - The gradient was *correct*, matching finite differences to 5.5 × 10⁻¹¹.
 
@@ -220,13 +218,13 @@ For x = (0,1) the softmax vector sums to **1.0**.
 
 4. **Effect of activation on the gradient.**
    - *Engineering observation:* at initialisation ‖∂L/∂W⁽¹⁾‖ was about 0.0009 for sigmoid, 0.06 for tanh, and 0.0017 for ReLU (seed 0). Success rates over 20 seeds were 8, 9 and 5.
-   - *Scientific explanation:* the backward pass multiplies by f′(a). Sigmoid's f′ ≤ 0.25 shrinks the signal, and its outputs are not zero-centred. Tanh's f′ ≤ 1 and it is zero-centred. ReLU's f′ is exactly 1 or 0, so it passes gradients undiminished through active units but blocks them completely through inactive ones. With only 2 hidden units, losing one is fatal.
+   - *Scientific explanation:* the backward pass multiplies by f′(a). Sigmoid's f′ ≤ 0.25 shrinks the signal, and its outputs are not zero-centred. Tanh's f′ ≤ 1 and it is zero-centred. ReLU's f′ is exactly 1 or 0, so it passes gradients undiminished through active units but blocks them completely through inactive ones. With only 2 hidden units, the loss of a single unit prevents a solution.
 
-5. **Why output layer and loss go together.** Together they define the probabilistic model of the target: Bernoulli → sigmoid + BCE, categorical → softmax + CE, real-valued Gaussian → linear + MSE. The matched pairs are negative log-likelihoods, so the logit gradient is simply p − y: well-scaled, and not killed by saturation. A mismatched pair behaves badly. Sigmoid + MSE has vanishing gradients on confident mistakes. Softmax + BCE treats mutually exclusive classes as independent.
+5. **Why output layer and loss go together.** Together they define the probabilistic model of the target: Bernoulli → sigmoid + BCE, categorical → softmax + CE, real-valued Gaussian → linear + MSE. The matched pairs are negative log-likelihoods, so the logit gradient is simply p − y: well-scaled, and not suppressed by saturation. A mismatched pair performs poorly. Sigmoid + MSE has vanishing gradients on confident mistakes. Softmax + BCE treats mutually exclusive classes as independent.
 
 6. **LLM: productivity vs verification.**
    - *Productivity:* the LLM produced the full training-loop boilerplate and the `BCEWithLogitsLoss`/`CrossEntropyLoss` wiring in seconds, and it converted the binary model to 3 classes by editing only the output layer and loss.
-   - *Verification was essential:* the first p − y check ran after training and printed all zeros. It "passed" without testing anything until it was moved to initialisation. Also, the single-seed run could easily have been reported as "tanh works". Only the multi-seed runs showed that the 2–2–1 network fails on over half of initialisations. Output/loss pairings (e.g. an extra sigmoid before `BCEWithLogitsLoss`) must also be checked by reading the code, because such a bug still runs without errors.
+   - *Verification was essential:* the first p − y check ran after training and printed all zeros. It appeared to pass without testing anything meaningful until it was moved to initialisation. Also, the single-seed run could have been misreported as evidence that tanh is reliable. Only the multi-seed runs showed that the 2–2–1 network fails on over half of initialisations. Output/loss pairings (e.g. an extra sigmoid before `BCEWithLogitsLoss`) must also be checked by reading the code, because such a bug still runs without errors.
 
 7. **Which tests scale.**
    - *Keep:* loss curves; train/validation accuracy; per-layer gradient-norm monitoring (catches vanishing, exploding, and dead units); activation/pre-activation statistics; multiple seeds; a random-initialisation check against symmetry; the softmax-sum and max-subtraction stability checks; overfitting a tiny batch as a smoke test.
