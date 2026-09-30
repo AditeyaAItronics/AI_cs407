@@ -279,7 +279,7 @@ More context removes ambiguity: P(· | on, the) places all its mass on {mat, rug
 
 A modern autoregressive language model optimises the same objective,
 
-  P(x₁, …, x_T) = ∏ₜ P(xₜ | x₁, …, xₜ₋₁),
+  P(x₁, …, x<sub>T</sub>) = ∏ₜ P(xₜ | x₁, …, xₜ₋₁),
 
 but represents each conditional distribution with a neural network rather than a table. The network maps a long context to a probability vector over the vocabulary. As the handout's comparison table notes, the models differ in representation (CPT vs. network), context (a fixed window vs. a long learned context), parameters (explicit probabilities vs. learned weights), and learning (counting vs. gradient-based training). They share the generation procedure: sampling one token at a time from P(next token | previous tokens).
 

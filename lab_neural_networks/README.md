@@ -184,8 +184,8 @@ Classes: 0 = both inactive, 1 = disagree, 2 = both active. Architecture: 2 → 2
 
 1. The final weight matrix W⁽²⁾ has shape **3 × 2** (outputs × hidden), plus a bias of size 3.
 2. There are **3 logits** per example.
-3. softmax(z)ₖ = e^{zₖ} / Σⱼ e^{zⱼ}. Every term is positive and the numerators add up to the denominator, so the probabilities sum to 1.
-4. **Why ∂L/∂z = p − y.** L = −Σₖ yₖ log pₖ = −z_c + log Σⱼ e^{zⱼ}, where c is the true class. Differentiating gives ∂L/∂zₖ = −yₖ + e^{zₖ}/Σⱼe^{zⱼ} = pₖ − yₖ. With a mean over N examples, this is divided by N.
+3. softmax(z)ₖ = exp(zₖ) / Σⱼ exp(zⱼ). Every term is positive and the numerators add up to the denominator, so the probabilities sum to 1.
+4. **Why ∂L/∂z = p − y.** L = −Σₖ yₖ log pₖ = −z<sub>c</sub> + log Σⱼ exp(zⱼ), where c is the true class. Differentiating gives ∂L/∂zₖ = −yₖ + exp(zₖ) / Σⱼ exp(zⱼ) = pₖ − yₖ. With a mean over N examples, this is divided by N.
 
 **Numerical check of p − y** (at initialisation): autograd's ∂L/∂z matches (p − y)/N to within **7.5 × 10⁻⁹**, i.e. float32 round-off. The first row, for x = (0,0) with true class 0, is [−0.1790, 0.0825, 0.0964] in both. Only the true class has a negative gradient.
 
@@ -200,7 +200,7 @@ Classes: 0 = both inactive, 1 = disagree, 2 = both active. Architecture: 2 → 2
 
 For x = (0,1) the softmax vector sums to **1.0**.
 
-**Optional diagnostic.** Adding 100 to all three logits changed the probabilities by at most **2.3 × 10⁻¹⁰**, which is float round-off. This follows from e^{z+c}/Σe^{z+c} = e^{z}/Σe^{z}. Adding 1000, however, makes a naive `exp` overflow to `inf`, and `inf/inf = nan`. That is why stable implementations compute softmax(z − max z). The answer is mathematically the same, but the largest exponent becomes e⁰ = 1, so nothing overflows. The max-subtracted version returned the correct probabilities.
+**Optional diagnostic.** Adding 100 to all three logits changed the probabilities by at most **2.3 × 10⁻¹⁰**, which is float round-off. This follows from exp(z + c) / Σ exp(z + c) = exp(z) / Σ exp(z). Adding 1000, however, makes a naive `exp` overflow to `inf`, and `inf/inf = nan`. That is why stable implementations compute softmax(z − max z). The answer is mathematically the same, but the largest exponent becomes e⁰ = 1, so nothing overflows. The max-subtracted version returned the correct probabilities.
 
 ---
 

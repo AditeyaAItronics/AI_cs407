@@ -60,7 +60,7 @@ python warehouse_search.py
 **Prompt** (based on the design above):
 
 > I am implementing a simple goal-based search agent in Python. The environment is a grid represented by an ASCII map. The agent starts at S and must reach G. The symbols # represent obstacles and . represents free cells. The agent can move up, down, left, or right, and every movement has cost 1.
-> Implement A\* search. Use Manhattan distance as the heuristic, h(n) = |x − x_G| + |y − y_G|.
+> Implement A\* search. Use Manhattan distance as the heuristic, h(n) = |x − x<sub>G</sub>| + |y − y<sub>G</sub>|.
 > The program should represent grid positions as states; maintain an appropriate frontier; calculate g(n), h(n) and f(n); avoid repeatedly expanding the same state; reconstruct the path when the goal is reached; report the path and its length; and report the number of states expanded.
 > Keep the implementation simple and explain the main components of the code.
 
@@ -139,7 +139,7 @@ A\* does save work when the heuristic is more informative, as the second map in 
 
 ## Task 6 – Investigation of the heuristic
 
-**Why Manhattan distance is appropriate.** With only horizontal and vertical unit moves, any path from n to G must make at least |x − x_G| horizontal moves and |y − y_G| vertical moves. The Manhattan distance is therefore never greater than the true cost, so it is **admissible**. A single move changes it by exactly 1, so it is also **consistent**. It is the exact cost when no obstacles are present.
+**Why Manhattan distance is appropriate.** With only horizontal and vertical unit moves, any path from n to G must make at least |x − x<sub>G</sub>| horizontal moves and |y − y<sub>G</sub>| vertical moves. The Manhattan distance is therefore never greater than the true cost, so it is **admissible**. A single move changes it by exactly 1, so it is also **consistent**. It is the exact cost when no obstacles are present.
 
 The four heuristics were evaluated on the original warehouse and on a second, more open map (included in the program as `SECOND_MAP`).
 
