@@ -1,5 +1,7 @@
 # CS F407 – Search Lab: Warehouse Robot Navigation with A\*
 
+**Name:** Aditeya Kayal &nbsp;&nbsp;|&nbsp;&nbsp; **ID:** 2024A8PS0689G &nbsp;&nbsp;|&nbsp;&nbsp; **Course:** CS F407 Artificial Intelligence
+
 This report presents the solution to the laboratory exercise
 [`search_lab.pdf`](https://github.com/tirtharajdash/CS-F407-AI-AY2026-27-S1/blob/main/materials/search_lab.pdf).
 
